@@ -57,10 +57,8 @@ request(url, function(err, res, results) {
         jsonObj.events.event = [];
         for(i =0; i<length; i++){
         myobject = parsedJSON.events.event[i];
- 
 
-        
-        //adding data to JSON
+        //adding data to concert.JSON
         jsonObj.events.event.push({
             id : myobject.id,
             title : myobject.title,
@@ -111,7 +109,7 @@ var Db = require('mongodb').Db;
 var Server = require('mongodb').Server;
 
 //establishing new connection
-var client = new Db('test', new Server('127.0.0.1', 27017), {safe:false});
+var client = new Db('concerts', new Server('127.0.0.1', 27017), {safe:false});
 
 //function to insert data into default collection
 var insertData = function(err, collection){
@@ -134,9 +132,9 @@ client.open(function(err,pClient){
         //console.log('jsonExp: ' + jsonExp);
         //console.log('concert: ' + concert);
         //calling function insertData on collection 'test'
-        client.collection("test6", insertData);
+        client.collection("lesconcerts", insertData);
         //calling fucntion listAllDta on collection 'test'
-        client.collection('test6', listAllData);    
+        client.collection('lesconcerts', listAllData);    
     }
     else console.log('\n ***error occured in node-mongodb.js***');
 });
