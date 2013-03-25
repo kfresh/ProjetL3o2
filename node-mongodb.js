@@ -1,37 +1,37 @@
+#!/usr/bin/env node
 
-//importing concert.json file
-var concert = require('./concert');
+//Visual mongoDB
+//var mongoExpress = require('mongo-express');
 
 var Db = require('mongodb').Db;
 var Server = require('mongodb').Server;
 
 //establishing new connection
-var client = new Db('test', new Server('127.0.0.1', 27017), {safe:false});
+var client = new Db('concerts', new Server('127.0.0.1', 27017), {safe:false});
 
-//function to insert data into default collection
-var insertData = function(err, collection){
-    //collection.insert({name: 'something'});
-    collection.insert({'concert' : concert});
-};
+var data ='';
 
-//function to list all data in default collection
-var listAllData = function(err, collection){
-    collection.find().toArray(function(err, results){
-        console.log(results);
-        client.close();
-    });
-};
+function getData(args) {
+    data = args;
+}
 
-//opening dataBase 
+function insertData(err, collection) {
+    collection.insert(data);
+    client.close();
+}
+
+function openClient(arg) {
+    getData(arg);
+    //opening dataBase 
 client.open(function(err,pClient){
     if(!err){
-        //console.log('jsonObj: ' + jsonObj);
-        //console.log('jsonExp: ' + jsonExp);
-        //console.log('concert: ' + concert);
         //calling function insertData on collection 'test'
-        client.collection("test3", insertData);
-        //calling fucntion listAllDta on collection 'test'
-        client.collection('test3', listAllData);    
+        client.collection("LesConcerts", insertData);
+        console.log('data inserted successfully!');
+
     }
     else console.log('\n ***error occured in node-mongodb.js***');
 });
+}
+
+exports.openClient = openClient;

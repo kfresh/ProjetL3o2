@@ -1,85 +1,89 @@
 #!/usr/bin/env node
 
 var fs = require('fs');
-
 var request = require('request');
-var util = require('util');
+var villes = require('./liste-villes');
+console.log('*** Total number of cities to process= ' + villes.france.length + ' ***');
 
-var url = 'http://ws.audioscrobbler.com/2.0/?method=geo.getevents&location=madrid&api_key=dbc287366d92998e7f5fb5ba6fb7e7f1&format=json';
+function iterateCities(url, cities){
+    for(i=0; i<cities.france.length; i++){
+        url1 = url + '&location=' + cities.france[i] + ',france';
+        getAttr(url1, cities.france[i]);
+    };
+}
 
-request(url, function(err, res, results) {
-    //chunk to store info captured from LastFm
-    var chunk= '';
-    //var to store parsed chunk info
-    var parsedJSON = '';
-    //var to store each parsed selection (object) from captured info
-    var myobject = '';
-    //storing all useful information on concerts
-    var parsedChunk = '';
-    //storing concert information on jsonObj
-    var jsonObj = {};
-    //creating output file to save json
-    var outputFileName = './concert.json';
-    //variable for storing stringify JSON
-    var jsonStringify = '';
-    
-    if(!err){
-        //console.log(results);
-        chunk += results;
-        parsedJSON = JSON.parse(chunk);
-        
-        var length;
-        length = (parsedJSON.events.event).length;
-        //console.log('length: ' + length);
-        
-        //creating JSON
-        jsonObj.events = {};
-        jsonObj.events.event = [];
-        for(i =0; i<length; i++){
-        myobject = parsedJSON.events.event[i];
- 
-
-        
-        //adding data to JSON
-        jsonObj.events.event.push({
-            id : myobject.id,
-            title : myobject.title,
-        artist : myobject.artists.artist,
-        address : {name: myobject.venue.name, street : myobject.venue.location.street, postalcode : myobject.venue.location.postalcode,
-                    city : myobject.venue.location.city, country : myobject.venue.location.country,
-                    'geo:point' : { 'geo:lat' : myobject.venue.location['geo:point']['geo:lat'], 'geo:long' : myobject.venue.location['geo:point']['geo:long']}},
-                    url : myobject.url,
-                    startDate : myobject.startDate,
-                    website : myobject.website
-        });
-        
-
-        
-  
-        
-        //jsonObj contains some information in json (non-stringify-d)
-        //jsonStringify stores stringify-d jsonObj
-        jsonStringify = JSON.stringify(jsonObj, null, 4);
-        //console.log(jsonStringify);
-        
+function getAttr(url, city){
+    var parsedRslts ='';
+    var total = 0;
+    var location ='';
+    request(url, function(err, res, results){
+        parsedRslts = JSON.parse(results);
+        if(parsedRslts.error){
+            console.log('\n***error could not fetch results for '+city+'!***\n');
+        }
+        else {
+        total = parsedRslts.events['@attr'].total;
+        location = parsedRslts.events['@attr'].location;
+        console.log('location: ' + location);
+        console.log("total concerts in this city to process: " + total);
+            getConcerts(url, total, location);
         };
-                
-        //writing them into file
-        fs.writeFile(outputFileName, jsonStringify, function(err) {
-            if(err) {
-                console.log(err);
-            } else {
-                console.log("JSON saved to " + outputFileName);
-    }
-        });
-        
-        
-        //exporting stringify-d jsonObj
-        exports.jsonStringify = jsonStringify;
-        //exporting concert information
+    });
+}
 
-        //console.log('json req-json-lastfm: ' + jsonStringify);
-    }
-    else 
-    console.log('\n ***error occured in req-json-lastfm.js***');
-});
+function writeJsonToFile(jsonStringify, outputFileName){
+    fs.writeFile(outputFileName, jsonStringify, function(err) {
+        if(err) {
+            console.log(err);
+        } else
+            console.log("JSON saved to " + outputFileName);
+    });
+}
+
+function pushEvents(parsedJSON, location, total){
+    var myobject = '';
+    //var events = {};
+    event = [];
+    var legnth =0;
+        length = (parsedJSON.events.event).length;
+        //creating JSON
+    for(i =0; i<length; i++){
+        myobject = parsedJSON.events.event[i];
+    //adding data to JSON
+    event.push({
+        number : i+1,
+        title : myobject.title,
+        artist : myobject.artists.artist,
+        address : {name: myobject.venue.name, street : myobject.venue.location.street,
+                    postalcode : myobject.venue.location.postalcode,
+                    city : myobject.venue.location.city, country : myobject.venue.location.country},
+        latlong : [ parseFloat(myobject.venue.location['geo:point']['geo:lat']), parseFloat(myobject.venue.location['geo:point']['geo:long'])],
+        url : myobject.url,
+        startDate : myobject.startDate,
+        website : myobject.website
+        });
+    };
+    //events['@attr'] = {"location": location, "total" : total};
+        callMongo(event, location);
+}
+
+function getConcerts(url, limit, location){
+    var url2 = url + '&limit=' + limit;
+    console.log('url: ' +url2 + '\n');
+    request(url2, function(err, res, results) {
+        var parsedJSON = '';
+        //var outputFileName = './concerts/('+location+')concerts.json';
+        parsedJSON = JSON.parse(results);
+        pushEvents(parsedJSON, location, limit);
+    });
+}
+
+function callMongo(data, location) {
+    var nodeGo = require('./node-mongodb');
+    console.log('processing database for: ' + location);
+    nodeGo.openClient(data);
+}
+
+var apiKey = 'dbc287366d92998e7f5fb5ba6fb7e7f1';
+var url = 'http://ws.audioscrobbler.com/2.0/?method=geo.getevents&api_key='+apiKey+'&format=json';
+iterateCities(url, villes);
