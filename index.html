@@ -136,10 +136,7 @@ var myInfoWindow = new google.maps.InfoWindow(myWindowOptions);
 google.maps.event.addListener(marqueur, 'click', function() {
   myInfoWindow.open(carte,marqueur);
 });
-                  
                  for (var i = 0 ; i < response.length; i++) {
-                  
-                 
                   var lemarqueur = new google.maps.Marker({
         position: new google.maps.LatLng(parseFloat(response[i].latlong[0]), parseFloat(response[i].latlong[1])),
         map: carte,
@@ -154,21 +151,14 @@ var InfoWindow = new google.maps.InfoWindow(WindowOptions);
 google.maps.event.addListener(lemarqueur, 'click', function() {
   InfoWindow.open(carte,lemarqueur);
 });
-                     
                  };
                   
                 }
             });
-
-
-                   
-
             }
         </script>
   </head>
-
   <body onload="initialiser()">
-
     <form id="myForm">
       <label for="address"> Adresse :</label> <input name="address" type="text" id="address" />
        <input name="Lat" type="Hidden" id="Lat" />
@@ -177,9 +167,6 @@ google.maps.event.addListener(lemarqueur, 'click', function() {
       <input type="button" value="Valider" id="valider" onclick = "overlay()"/>
       <input type="reset" value="Reset !" />
     </form>
-      
-
-
 <div id="carte" style="width:100%; height:100%"></div>
 
 <div id="content"></div>
