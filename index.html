@@ -52,6 +52,22 @@ minLength: 2
                 var carte = new google.maps.Map(document.getElementById("carte"), options);
             }
 
+            function newPoint(carte, response, i ){
+              var lemarqueur = new google.maps.Marker({
+        position: new google.maps.LatLng(parseFloat(response.latlong[0]), parseFloat(response.latlong[1])),
+        map: carte,
+        title: response.title
+        });
+
+var WindowOptions = {
+  content:  '<h3>'+response.title+' No '+i+'</h3>' 
+};
+
+var InfoWindow = new google.maps.InfoWindow(WindowOptions);
+google.maps.event.addListener(lemarqueur, 'click', function() {
+  InfoWindow.open(carte,lemarqueur);
+});
+            }
             //c'est ma fonction qui actualise la maps a chaque fois qu'on click dessus !
             //pour tester mettez bien des cordonnées qui son en france!!!
 
@@ -89,6 +105,10 @@ minLength: 2
               
             });
 
+        }
+            if (document.getElementById("Rayon").value == '')
+        {
+          document.getElementById("Rayon").value = "1";
         }
 
 $.ajax({
@@ -137,20 +157,7 @@ google.maps.event.addListener(marqueur, 'click', function() {
   myInfoWindow.open(carte,marqueur);
 });
                  for (var i = 0 ; i < response.length; i++) {
-                  var lemarqueur = new google.maps.Marker({
-        position: new google.maps.LatLng(parseFloat(response[i].latlong[0]), parseFloat(response[i].latlong[1])),
-        map: carte,
-        title: response[i].title
-        });
-
-var WindowOptions = {
-  content:  '<h3>'+response[i].title+' No '+i+'</h3>' 
-};
-
-var InfoWindow = new google.maps.InfoWindow(WindowOptions);
-google.maps.event.addListener(lemarqueur, 'click', function() {
-  InfoWindow.open(carte,lemarqueur);
-});
+newPoint(carte, response[i], i);
                  };
                   
                 }
