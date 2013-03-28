@@ -60,8 +60,9 @@ minLength: 2
         });
 
 var WindowOptions = {
-  content:  '<h3>'+response.title+' No '+i+'</h3>' 
+  content:  '<h3>'+response.title+'</h3> <strong>Artistes :</strong>'+response.artist+'<br><strong>Date : </strong>'+response.startDate+'<br><a href ='+response.website+'> Plus d\'infos</a>' 
 };
+
 
 var InfoWindow = new google.maps.InfoWindow(WindowOptions);
 google.maps.event.addListener(lemarqueur, 'click', function() {
