@@ -51,6 +51,7 @@ function pushEvents(parsedJSON, location, total){
         myobject = parsedJSON.events.event[i];
     //adding data to JSON
     event.push({
+        id : myobject.id,
         number : i+1,
         title : myobject.title,
         artist : myobject.artists.artist,
